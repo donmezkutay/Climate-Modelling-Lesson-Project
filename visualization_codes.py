@@ -58,7 +58,7 @@ from shapely.geometry import mapping
 
 def plot_facet_map(data_df, cmap, vmin, vmax, norm, ticks,
                    crs_data, graphic_no, var_name, model_level,
-                   plevel, method, fig_array):
+                   plevel, method, difference_method, fig_array):
     
     # graphic features
     cmap = cmap
@@ -114,7 +114,7 @@ def plot_facet_map(data_df, cmap, vmin, vmax, norm, ticks,
 
     cbar = fig.colorbar(mesh, ticks=ticks, loc='b', drawedges = False, shrink=1, space = -0.6, aspect = 50, )
     cbar.ax.tick_params(labelsize=11, )
-    cbar.set_label(label='{} | Model-ERA5'.format(var_name.upper()), size=16, loc = 'center', y=0.35, weight = 'bold')
+    cbar.set_label(label='{} | {}'.format(var_name.upper(), difference_method), size=16, loc = 'center', y=0.35, weight = 'bold')
     cbar.outline.set_linewidth(2)
     cbar.minorticks_off()
     cbar.ax.get_children()[4].set_color('black')

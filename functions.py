@@ -17,6 +17,27 @@ import pandas as pd
 from matplotlib.colors import BoundaryNorm
 import numpy as np
 
+def define_credentials():
+    
+    # credentials
+    credentials = pd.read_csv(r'credentials.txt')
+    username = credentials['username'][0]
+    password = credentials['password'][0]
+    
+    return username, password
+
+def define_era5_var_matching_name():
+    
+    var_map_dict =  {
+    '2t': 'VAR_2T', #single
+    'msl': 'MSL', #single
+    '10u': 'VAR_10U', #single
+    '10V': 'VAR_10V', #single
+    't': 'T', # pressure
+    'z': 'Z' # pressure
+    }
+    
+    return var_map_dict
 
 def adjust_unit(data, variable):
     
@@ -49,27 +70,29 @@ def adjust_unit(data, variable):
     if variable in ['T_2M', 'T', 'VAR_2T', 'T', 't2m', 't']:
         return data - unit_conversion[variable]
     
-    return data[variable] * unit_conversion[variable]
+    return data * unit_conversion[variable]
 
 def get_average(data, variable, month_start,
                 month_end, *args, **kwargs):
     
     data = adjust_unit(data, variable)
+        
     return data.sel(time = (data['time.month'] >= month_start) &
-                           (data['time.month'] <= month_end),
-                           *args, **kwargs) \
-                           .mean(dim = 'time')
-    
+                               (data['time.month'] <= month_end),
+                               *args, **kwargs) \
+                               .mean(dim = 'time')
     
 def get_average_bymonth(data, variable, month_start,
                         month_end, *args, **kwargs):
     
     data = adjust_unit(data, variable)
+        
     return data.groupby('time.month') \
-               .mean(dim='time') \
-               .sel(month = range(month_start,
-                                  month_end+1),
-                   *args, **kwargs)
+                   .mean(dim='time') \
+                   .sel(month = range(month_start,
+                                      month_end+1),
+                       *args, **kwargs)
+
 
 def assing_proj_info(data, crs_data,
                      x_dims, y_dims):
@@ -112,7 +135,7 @@ def retrieve_era5_data_link(model_level, var_name, year):
     
     return var_link
 
-def concat_season_means(data):
+def calculate_season_means(data):
     
     seasons = {
         'spring':slice(3,4,5),
