@@ -1,60 +1,9 @@
-import xarray as xr
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import salem
-import xarray as xr
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import proplot as plot
 import cartopy
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER , LATITUDE_FORMATTER
-import matplotlib as mpl
-import salem
-import rasterio
-from netCDF4 import Dataset
-import xarray as xr
-import numpy as np
-import cartopy
-import matplotlib.pyplot as plt
-from visjobs.visualize import easy_plot
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER , LATITUDE_FORMATTER
-import matplotlib.colors as mcolors
-from datetime import datetime, timedelta
-import matplotlib.patheffects as PathEffects
-from cartopy.io.shapereader import Reader
-from cartopy.feature import ShapelyFeature
 import cartopy.io.shapereader as shpreader
-import proplot as plot
-import rioxarray
-# gerekli kütüphaneleri yükleyelim
-import xarray as xr
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-#from gradient.gradient import Gradient
-import proplot as plot
-import cartopy
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER , LATITUDE_FORMATTER
-import matplotlib as mpl
-import salem
-import rasterio
-from visjobs.visualize import easy_plot
-from matplotlib.colors import BoundaryNorm
-import imageio
-import rioxarray
-from cartopy.io.shapereader import Reader
-from cartopy.feature import ShapelyFeature
-from cartopy.io.shapereader import Reader
-from cartopy.feature import ShapelyFeature
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+import numpy as np
 import proplot
-import geopandas as gpd
-from matplotlib.colors import BoundaryNorm
-from shapely.geometry import mapping
-
-
+from cartopy.mpl.gridliner import LATITUDE_FORMATTER, LONGITUDE_FORMATTER
 
 def plot_facet_map(data_df, cmap, vmin, vmax, norm, ticks,
                    crs_data, graphic_no, var_name, model_level,

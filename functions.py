@@ -1,21 +1,23 @@
-import xarray as xr
-import rioxarray
 from datetime import datetime
-from scipy.constants import g
-import geopandas as gpd
+
 import cartopy
+import geopandas as gpd
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import proplot
+import requests
+import rioxarray
+import xarray as xr
+from bs4 import BeautifulSoup
+from matplotlib.colors import BoundaryNorm
+from scipy.constants import g
 from shapely.geometry import mapping
 from visjobs.datas import get_ERA5
-import requests
-from bs4 import BeautifulSoup 
-import matplotlib
-import proplot
-import cartopy
-import matplotlib.pyplot as plt
+
 from visualization_codes import plot_facet_map
-import pandas as pd
-from matplotlib.colors import BoundaryNorm
-import numpy as np
+
 
 def define_credentials():
     
@@ -32,7 +34,8 @@ def define_era5_var_matching_name():
     '2t': 'VAR_2T', #single
     'msl': 'MSL', #single
     '10u': 'VAR_10U', #single
-    '10V': 'VAR_10V', #single
+    '10v': 'VAR_10V', #single
+    'tp': 'TP', #single
     't': 'T', # pressure
     'z': 'Z' # pressure
     }
@@ -41,6 +44,12 @@ def define_era5_var_matching_name():
 
 def adjust_unit(data, variable):
     
+    days_int_month = data['time']\
+                        .dt\
+                        .days_in_month\
+                        .values[:, 
+                                np.newaxis,
+                                np.newaxis]
     unit_conversion = {
         'PMSL': 0.01,
         'RELHUM_2M': 1,
@@ -55,13 +64,14 @@ def adjust_unit(data, variable):
         'MSL': 0.01,
         'VAR_10U': 3.6,
         'VAR_10V': 3.6,
+        'TP': 1e3*days_int_month, # since monthly accumulation tp is m/per day in nature
         'T': 273.15, 
         'Z': 1/g,
         'u10':3.6,
         'v10':3.6,
         't2m':273.15,
         'msl':0.01,
-        'tp':1,
+        'tp':1e3,
         'z':1/g,
         't':273.15
         
@@ -76,23 +86,35 @@ def get_average(data, variable, month_start,
                 month_end, *args, **kwargs):
     
     data = adjust_unit(data, variable)
-        
-    return data.sel(time = (data['time.month'] >= month_start) &
-                               (data['time.month'] <= month_end),
-                               *args, **kwargs) \
-                               .mean(dim = 'time')
+    
+    if variable in ['tp', 'TP', 'TOT_PREC']:
+        return data.sel(time = (data['time.month'] >= month_start) &
+                                   (data['time.month'] <= month_end),
+                                   *args, **kwargs) \
+                                   .sum(dim = 'time')
+    else:
+        return data.sel(time = (data['time.month'] >= month_start) &
+                                   (data['time.month'] <= month_end),
+                                   *args, **kwargs) \
+                                   .mean(dim = 'time')
     
 def get_average_bymonth(data, variable, month_start,
                         month_end, *args, **kwargs):
     
     data = adjust_unit(data, variable)
         
-    return data.groupby('time.month') \
-                   .mean(dim='time') \
-                   .sel(month = range(month_start,
-                                      month_end+1),
-                       *args, **kwargs)
-
+    if variable in ['tp', 'TP', 'TOT_PREC']:
+        return data.groupby('time.month') \
+                       .sum(dim='time') \
+                       .sel(month = range(month_start,
+                                          month_end+1),
+                           *args, **kwargs)
+    else:
+        return data.groupby('time.month') \
+                       .mean(dim='time') \
+                       .sel(month = range(month_start,
+                                          month_end+1),
+                           *args, **kwargs)
 
 def assing_proj_info(data, crs_data,
                      x_dims, y_dims):
@@ -116,7 +138,10 @@ def session_accredition(username, password):
 def retrieve_era5_data_link(model_level, var_name, year):
     
     # server link
-    server_link = fr'https://rda.ucar.edu/thredds/catalog/files/g/ds633.1_nc/e5.moda.an.{model_level}/{year}/catalog.html'
+    if var_name == 'tp':
+        server_link = fr'https://rda.ucar.edu/thredds/catalog/files/g/ds633.1_nc/e5.moda.fc.{model_level}.accumu/{year}/catalog.html'
+    else:
+        server_link = fr'https://rda.ucar.edu/thredds/catalog/files/g/ds633.1_nc/e5.moda.an.{model_level}/{year}/catalog.html'
     
     # Make a request to the nomads server link
     page = requests.get(server_link)
