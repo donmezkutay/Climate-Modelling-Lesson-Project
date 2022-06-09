@@ -1,22 +1,10 @@
-from datetime import datetime
-
-import cartopy
-import geopandas as gpd
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import proplot
 import requests
-import rioxarray
 import xarray as xr
 from bs4 import BeautifulSoup
-from matplotlib.colors import BoundaryNorm
 from scipy.constants import g
 from shapely.geometry import mapping
-from visjobs.datas import get_ERA5
-
-from visualization_codes import plot_facet_map
 
 
 def define_credentials():
@@ -37,7 +25,8 @@ def define_era5_var_matching_name():
     '10v': 'VAR_10V', #single
     'tp': 'TP', #single
     't': 'T', # pressure
-    'z': 'Z' # pressure
+    'z': 'Z', # pressure
+    'q': 'Q' # pressure
     }
     
     return var_map_dict
@@ -60,12 +49,12 @@ def adjust_unit(data, variable):
         'FI': 1/g,
         'RELHUM': 1,
         'T': 273.15,
+        'QV': 1e3,
         'VAR_2T': 273.15,
         'MSL': 0.01,
         'VAR_10U': 3.6,
         'VAR_10V': 3.6,
         'TP': 1e3*days_int_month, # since monthly accumulation tp is m/per day in nature
-        'T': 273.15, 
         'Z': 1/g,
         'u10':3.6,
         'v10':3.6,
@@ -73,7 +62,9 @@ def adjust_unit(data, variable):
         'msl':0.01,
         'tp':1e3,
         'z':1/g,
-        't':273.15
+        't':273.15,
+        'q':1e3,
+        'Q':1e3
         
     }
     
